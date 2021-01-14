@@ -51,7 +51,7 @@ namespace PortBridge
                 pipeSecurity.SetSecurityDescriptorSddlForm("D:(D;;FA;;;NU)(A;;0x12019f;;;WD)(A;;0x12019f;;;CO)");
 
                 NamedPipeServerStream pipeListener =
-                    new NamedPipeServerStream(
+                    NamedPipeServerStreamConstructors.New(
                         localPipe,
                         PipeDirection.InOut,
                         NamedPipeServerStream.MaxAllowedServerInstances,
