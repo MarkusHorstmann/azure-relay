@@ -7,6 +7,7 @@ namespace PortBridge
     using System.Diagnostics;
     using System.IO;
     using System.Net.Sockets;
+    using System.Threading.Tasks;
 
     public class MultiplexConnectionOutputPump : Pump
     {
@@ -34,7 +35,8 @@ namespace PortBridge
             IsRunning = true;
 
             Caller = new PumpAsyncResult(callback, state);
-            bufferRead.BeginInvoke(inputBuffer, preambleSize, inputBuffer.Length - preambleSize, DoneReading, null);
+            Task.Run(() => bufferRead(inputBuffer, preambleSize, inputBuffer.Length - preambleSize)).ContinueWith(DoneReading);
+            //bufferRead.BeginInvoke(inputBuffer, preambleSize, inputBuffer.Length - preambleSize, DoneReading, null);
             return Caller;
         }
 
@@ -45,7 +47,8 @@ namespace PortBridge
             {
                 try
                 {
-                    bytesRead = bufferRead.EndInvoke(readOutputAsyncResult);
+                    bytesRead = (readOutputAsyncResult as Task<int>).Result;
+                    //bytesRead = bufferRead.EndInvoke(readOutputAsyncResult);
 #if VERBOSE
                     Trace.TraceInformation("Output, read bytes: {0}", bytesRead);
 #endif
@@ -92,7 +95,8 @@ namespace PortBridge
                     {
                         try
                         {
-                            bufferRead.BeginInvoke(inputBuffer, preambleSize, inputBuffer.Length - preambleSize, DoneReading, null);
+                            Task.Run(() => bufferRead(inputBuffer, preambleSize, inputBuffer.Length - preambleSize)).ContinueWith(DoneReading);
+                            //bufferRead.BeginInvoke(inputBuffer, preambleSize, inputBuffer.Length - preambleSize, DoneReading, null);
                         }
                         catch (Exception ex)
                         {
